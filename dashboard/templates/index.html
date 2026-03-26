@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Guardian Dashboard</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-brand">
+                <h1>AI-Guardian</h1>
+                <span class="subtitle">Smart Server Room Monitoring</span>
+            </div>
+            <div class="header-status">
+                <span class="status-indicator" id="wsIndicator"></span>
+                <span id="wsStatusText">Connecting...</span>
+            </div>
+        </header>
+
+        <!-- Metrics Row -->
+        <div class="metrics-row">
+            <div class="metric-card" id="card-temp">
+                <div class="metric-icon">&#127777;</div>
+                <div class="metric-content">
+                    <div class="metric-value" id="val-temp">--</div>
+                    <div class="metric-label">Temperature</div>
+                    <div class="metric-status" id="status-temp">--</div>
+                </div>
+            </div>
+            <div class="metric-card" id="card-hum">
+                <div class="metric-icon">&#128167;</div>
+                <div class="metric-content">
+                    <div class="metric-value" id="val-hum">--</div>
+                    <div class="metric-label">Humidity</div>
+                </div>
+            </div>
+            <div class="metric-card" id="card-dust">
+                <div class="metric-icon">&#128465;</div>
+                <div class="metric-content">
+                    <div class="metric-value" id="val-dust">--</div>
+                    <div class="metric-label">PM2.5</div>
+                    <div class="metric-status" id="status-dust">--</div>
+                </div>
+            </div>
+            <div class="metric-card" id="card-gas">
+                <div class="metric-icon">&#128293;</div>
+                <div class="metric-content">
+                    <div class="metric-value" id="val-gas">--</div>
+                    <div class="metric-label">Gas Level</div>
+                    <div class="metric-status" id="status-gas">--</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-grid">
+            <!-- Left Column -->
+            <div class="main-col">
+                <!-- Sensor Status -->
+                <section class="card">
+                    <h2>Sensor Status</h2>
+                    <div class="sensor-list">
+                        <div class="sensor-row">
+                            <span class="sensor-label">Motion (PIR)</span>
+                            <span class="sensor-badge" id="badge-motion">--</span>
+                        </div>
+                        <div class="sensor-row">
+                            <span class="sensor-label">Door Status</span>
+                            <span class="sensor-badge" id="badge-door">--</span>
+                        </div>
+                        <div class="sensor-row">
+                            <span class="sensor-label">Water Leak</span>
+                            <span class="sensor-badge" id="badge-leak">--</span>
+                        </div>
+                        <div class="sensor-row">
+                            <span class="sensor-label">Electric Leak</span>
+                            <span class="sensor-value" id="val-current">-- A</span>
+                        </div>
+                        <div class="sensor-row">
+                            <span class="sensor-label">Input Voltage</span>
+                            <span class="sensor-value" id="val-vin">-- V</span>
+                        </div>
+                        <div class="sensor-row">
+                            <span class="sensor-label">UPS Voltage</span>
+                            <span class="sensor-value" id="val-ups">-- V</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Quick Actions -->
+                <section class="card">
+                    <h2>Emergency Actions</h2>
+                    <div class="actions-grid">
+                        <button class="btn btn-danger" onclick="triggerAction('fire', 'critical')">
+                            Fire Emergency
+                        </button>
+                        <button class="btn btn-danger" onclick="triggerAction('flood', 'critical')">
+                            Flood Emergency
+                        </button>
+                        <button class="btn btn-danger" onclick="triggerAction('gas_leak', 'critical')">
+                            Gas Leak
+                        </button>
+                        <button class="btn btn-danger" onclick="triggerAction('electric_leak', 'critical')">
+                            Electric Leak
+                        </button>
+                        <button class="btn btn-warning" onclick="triggerAction('intrusion', 'high')">
+                            Intrusion
+                        </button>
+                        <button class="btn btn-primary" onclick="triggerAction('clear', 'normal')">
+                            Clear All
+                        </button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column -->
+            <div class="main-col">
+                <!-- Charts -->
+                <section class="card">
+                    <h2>Temperature & Humidity</h2>
+                    <div class="chart-wrapper">
+                        <canvas id="chartTempHum"></canvas>
+                    </div>
+                </section>
+
+                <section class="card">
+                    <h2>Gas & Dust Levels</h2>
+                    <div class="chart-wrapper">
+                        <canvas id="chartGasDust"></canvas>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Alerts Section -->
+        <section class="card alerts-section">
+            <h2>Recent Alerts</h2>
+            <div class="alerts-container" id="alertsContainer">
+                <p class="no-data">No alerts recorded.</p>
+            </div>
+        </section>
+    </div>
+
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>
