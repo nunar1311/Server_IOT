@@ -1,6 +1,6 @@
 ---
 name: AI-Guardian Deployment Plan
-overview: "Lên ke hoach trien khai toan dien he thong AI-Guardian: giam sat & phan ung su co phong server thong minh ung dung IoT va AI, su dung ESP32 NodeMCU-32S CH340 + Pico RP2040 + MongoDB. TOAN BO 8 GIAI DOAN DA HOAN THANH."
+overview: "Lên ke hoach trien khai toan dien he thong AI-Guardian: giam sat & phan ung su co phong server thong minh ung dung IoT va AI, su dung ESP32 NodeMCU-32S CH340 + Pico RP2040 (hoac Pico Emulator tren Windows) + MongoDB. TOAN BO 9 GIAI DOAN DA HOAN THANH."
 todos:
   - id: folder-structure
     content: Tao cau truc thu muc project
@@ -10,6 +10,9 @@ todos:
     status: completed
   - id: pico-actuator
     content: Viet code Pico RP2040 Actuator
+    status: completed
+  - id: pico-emulator
+    content: Viet Pico RP2040 Emulator cho Windows (Python + EXE)
     status: completed
   - id: esp32-cam
     content: Viet code ESP32-CAM AI
@@ -31,17 +34,18 @@ isProject: false
 
 ## AI-Guardian: Ke hoach Trien khai & Huong dan Di day
 
-### Trang Thai: HOAN THANH 100% (27/03/2026) - Hardware: ESP32 NodeMCU-32S CH340 + Pico RP2040
+### Trang Thai: HOAN THANH 100% (27/03/2026) - Hardware: ESP32 NodeMCU-32S CH340 + Pico RP2040 (hoac Pico Emulator Windows)
 
-Tat ca 8 giai doan da duoc trien khai. Xem chi tiet trong tung file nguon.
+Tat ca 9 giai doan da duoc trien khai. Xem chi tiet trong tung file nguon.
 
 ### Hardware Thuc Te
 
-| Thanh phan | Model                    | Chip                            | USB            | Ban phim |
-| ---------- | ------------------------ | ------------------------------- | -------------- | -------- |
-| MCU Chinh  | ESP32 NodeMCU-32S        | ESP-WROOM-32 (dual-core 240MHz) | CH340 USB-UART | 30 pins  |
-| Actuator   | Raspberry Pi Pico RP2040 | RP2040 (dual-core 133MHz)       | Micro USB      | 40 pins  |
-| Server     | PC/Laptop/Server         | Python 3 + Docker               | -              | -        |
+| Thanh phan | Model                    | Chip                            | USB            | Ban phim | Ghi chu |
+| ---------- | ------------------------ | ------------------------------- | -------------- | -------- | -------- |
+| MCU Chinh  | ESP32 NodeMCU-32S        | ESP-WROOM-32 (dual-core 240MHz) | CH340 USB-UART | 30 pins  | Cam bien |
+| Actuator   | Raspberry Pi Pico RP2040 | RP2040 (dual-core 133MHz)       | Micro USB      | 40 pins  | Thu muc: hardware/pico_actuator |
+| Actuator   | **Pico Emulator (Windows)** | Python + paho-mqtt            | -              | -        | Thu muc: emulator/pico_emulator |
+| Server     | PC/Laptop/Server         | Python 3 + Docker               | -              | -        | Backend + MongoDB + Mosquitto |
 
 **ESP32 NodeMCU-32S CH340 pinout thuc te:**
 
@@ -563,6 +567,21 @@ c:\Users\nguyenhoangquan\Documents\Server_IOT\
 │   ├── 📄 mosquitto.conf               # MQTT broker config
 │   └── 📄 init_mongo.js                # Khoi tao database, tao user
 │
+├── 📁 emulator/
+│   └── 📁 pico_emulator/
+│       ├── 📄 __init__.py               # Package init
+│       ├── 📄 __main__.py               # Entry point (python -m)
+│       ├── 📄 main.py                   # Main entry point
+│       ├── 📄 config.py                 # MQTT config, relay map, buzzer patterns
+│       ├── 📄 emulator_core.py          # Core relay state + action handlers
+│       ├── 📄 mqtt_client.py            # MQTT client (paho-mqtt)
+│       ├── 📄 sound_manager.py          # Buzzer sound (winsound)
+│       ├── 📄 ui_console.py             # Console UI (ANSI colors)
+│       └── 📄 ui_tkinter.py            # Tkinter GUI (optional)
+│   ├── 📄 requirements.txt              # Dependencies (paho-mqtt, pyinstaller)
+│   ├── 📄 build.bat                     # Build EXE (console mode)
+│   └── 📄 build_gui.bat                 # Build EXE (GUI mode)
+│
 ├── 📁 docs/
 │   ├── 📄 wiring_diagram.md            # So do di day chi tiet (368 lines)
 │   ├── 📄 hardware_setup.md            # Huong dan lap rap (276 lines)
@@ -609,7 +628,7 @@ docker-compose up -d
 3. Flash size: 4MB (APP) / 1.2MB (SPIFFS)
 4. Cau hinh WiFi/MQTT trong config.h
 
-#### GIAI DOAN 3: Pico RP2040 Actuator
+#### GIAI DOAN 3: Pico RP2040 Actuator (Hardware)
 
 **File:** `hardware/pico_actuator/main.py`
 
@@ -618,11 +637,85 @@ docker-compose up -d
 - **Action handlers**: fire, flood, gas_leak, electric_leak, intrusion, temp_high, clear, reset, manual
 - **Alarm patterns**: emergency (5x beep), warning (3x beep), ok (1x beep)
 
-**Cai dat:**
+**Cai dat hardware (Pico thuc):**
 
 1. Copy main.py vao Pico (Thonny/Picotool)
 2. Dam bao umqtt.simple da duoc cai dat tren Pico
 3. Cau hinh MQTT_BROKER, MQTT_USER, MQTT_PASS
+
+#### GIAI DOAN 3B: Pico RP2040 Emulator (Windows)
+
+**Thu muc:** `emulator/pico_emulator/`
+
+**Files:**
+
+| File | Mo ta |
+| ---- | ----- |
+| `config.py` | Cau hinh MQTT, relay map, buzzer patterns |
+| `emulator_core.py` | Core logic relay state + action handlers (port tu Pico MicroPython) |
+| `mqtt_client.py` | MQTT client (paho-mqtt, thay the umqtt.simple) |
+| `sound_manager.py` | Buzzer sound qua winsound (Windows native) |
+| `ui_console.py` | Console UI voi ANSI colors + box drawing |
+| `ui_tkinter.py` | Tkinter GUI (optional) |
+| `main.py` | Entry point |
+
+**MQTT Topics (giong Pico thuc):**
+
+| Topic | Direction | Payload |
+| ----- | --------- | ------- |
+| `ai-guardian/actions` | Subscribe | `{"action": "fire", "priority": "critical", ...}` |
+| `ai-guardian/actuator/status` | Publish | `{"node": "pico_emulator_win", "state": {...}, ...}` |
+| `ai-guardian/actuator/ack` | Publish | `{"node": "pico_emulator_win", "action": "fire", "status": "handled"}` |
+
+**Chay Python script:**
+
+```bash
+cd emulator
+pip install -r requirements.txt
+python pico_emulator/main.py --console
+```
+
+**Build Windows EXE:**
+
+```bash
+cd emulator
+.\build.bat
+dist\PicoEmulator.exe
+```
+
+**Command line options:**
+
+| Option | Mo ta |
+| ------ | ----- |
+| `--gui` | Su dung Tkinter GUI thay vi console |
+| `--broker <addr>` | MQTT broker address (mac dinh: localhost) |
+| `--port <port>` | MQTT broker port (mac dinh: 1883) |
+| `--no-sound` | Tat am thanh buzzer |
+| `--client-id <id>` | Custom client ID |
+
+**Console commands (when running in console mode):**
+
+```
+fire, flood, gas_leak, electric_leak, intrusion, temp_high, clear, reset
+manual <device> <on|off>  - Manual control
+status                       - Show status
+sound on|off                 - Toggle sound
+exit, quit                   - Exit
+```
+
+**Actions va thiết bi được điều khiển:**
+
+| Action | Thiết bị bật | Priority |
+|--------|--------------|----------|
+| `fire` | buzzer, warning_light, co2, fan, power_cut (critical) | `critical` |
+| `flood` | buzzer, pump, warning_light, power_cut (critical) | `critical` |
+| `gas_leak` | buzzer, fan, warning_light, power_cut (critical) | `critical` |
+| `electric_leak` | buzzer, warning_light, power_cut | `critical` |
+| `intrusion` | buzzer, warning_light, door_lock | `high` |
+| `temp_high` | fan, buzzer/warning_light (critical) | normal/critical |
+| `clear` | Tat ca OFF | - |
+| `reset` | Tat ca OFF | - |
+| `manual` | Theo dict `{"device": true/false}` | - |
 
 #### GIAI DOAN 4: Backend FastAPI + AI
 
@@ -743,12 +836,49 @@ python app.py
 - Nen dung TLS cho production
 - Password mac dinh: `ai_guardian_secure_pass_2024`
 
+⚠️ **Pico Emulator (Windows) - Thay the Pico RP2040:**
+
+- Emulator hoat dong giong nhu Pico thuc: subscribe MQTT, xu ly actions, publish ack/status
+- Chi can Python 3 + paho-mqtt, khong can hardware
+- Co 2 che do: Console UI (ANSI colors) va GUI (Tkinter)
+- Build thanh EXE de chay nhanh: `cd emulator && .\build.bat`
+- Tat ca actions (fire, flood, gas_leak, etc.) duoc ho tro voi buzzer sounds
+
 ---
 
 ### HUONG DAN BAT DAU
+
+#### Cach 1: Su dung Pico RP2040 thuc (Hardware)
 
 1. **Buoc 1**: `cd data && docker-compose up -d` (Khoi dong MongoDB + Mosquitto)
 2. **Buoc 2**: `cd backend && pip install -r requirements.txt && uvicorn app:app --host 0.0.0.0 --port 8000`
 3. **Buoc 3**: `cd dashboard && python app.py` (Hoac truy cap qua backend: `GET /dashboard`)
 4. **Buoc 4**: Nap code cho ESP32 va Pico theo huong dan trong `docs/hardware_setup.md`
 5. **Buoc 5**: Cau hinh WiFi/MQTT IP trong config.h (ESP32) va main.py (Pico)
+
+#### Cach 2: Su dung Pico Emulator tren Windows (khong can hardware)
+
+1. **Buoc 1**: `cd data && docker-compose up -d` (Khoi dong MongoDB + Mosquitto)
+2. **Buoc 2**: `cd backend && pip install -r requirements.txt && uvicorn app:app --host 0.0.0.0 --port 8000`
+3. **Buoc 3**: `cd dashboard && python app.py`
+4. **Buoc 4**: Chay Pico Emulator (Console mode):
+
+   ```bash
+   cd emulator
+   pip install -r requirements.txt
+   python pico_emulator/main.py --console
+   ```
+
+   Hoac GUI mode:
+
+   ```bash
+   python pico_emulator/main.py --gui
+   ```
+
+5. **Buoc 5**: (Optional) Build thanh EXE:
+
+   ```bash
+   cd emulator
+   .\build.bat
+   dist\PicoEmulator.exe
+   ```

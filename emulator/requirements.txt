@@ -1,0 +1,9 @@
+# ============================================================
+# AI-Guardian - Pico Emulator Build Configuration
+# ============================================================
+
+# Python dependencies
+paho-mqtt>=2.0.0
+
+# Optional: for building Windows executable
+pyinstaller>=6.0.0
